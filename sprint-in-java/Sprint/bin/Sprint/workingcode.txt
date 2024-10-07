@@ -1,0 +1,221 @@
+package Sprint;
+import java.util.Scanner;
+
+
+
+public class SprintSimilar {
+	public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the number of cells you need:");
+        int numberOfCells = scanner.nextInt();
+        scanner.nextLine();
+        
+        System.out.print("Enter the number of number of maximum executable instructions you need (maximum possible limit 5000):");
+        int maxExInstruction = scanner.nextInt();
+        scanner.nextLine();
+        
+        if(maxExInstruction > 5000) {
+        	maxExInstruction = 5000;
+        }
+        
+        
+        System.out.print("Enter a series of integer numbers separated by spaces:");
+        String input = scanner.nextLine();
+        String[] numberStrings = input.split(" ");
+        
+        scanner.nextLine();
+        
+        int[] sprintCode = new int[numberOfCells+1];
+        
+        sprintCode[0] = 0;
+        
+        for (int i = 0; i < numberStrings.length; i++) {
+            sprintCode[i + 1] = Integer.parseInt(numberStrings[i]);
+        }
+        
+        System.out.println("Inputed Code:");
+        for (int loc =1; loc < sprintCode.length; loc++) {
+            System.out.println(loc + " --> " + sprintCode[loc]);
+        }
+        execution(sprintCode, maxExInstruction);
+        
+        scanner.close();
+	}
+	
+	//execution function
+	public static void execution(int sprintCode[], int maxInstruction) {
+		
+		Scanner scanner = new Scanner(System.in);
+		int programCounter = 1;
+		int instructionPointer = 1;
+		int codeLength = sprintCode.length;
+		int instructionExecuted = 0;
+		while(programCounter <= codeLength && instructionExecuted < maxInstruction) {
+			switch(sprintCode[programCounter]) {
+			case 0:
+				instructionPointer = programCounter + 3;
+				// 0 data location --> copy data in the memory location
+				sprintCode[sprintCode[programCounter+2]] = sprintCode[programCounter+1];
+				break;
+			case 1:
+				instructionPointer = programCounter + 4;
+				// 1 location1 location2 location3 --> add the values of location1 and location2 and put the sum in loaction3
+				sprintCode[sprintCode[programCounter+3]] = sprintCode[sprintCode[programCounter+1]] + sprintCode[sprintCode[programCounter+2]];
+				break;
+			case 2:
+				instructionPointer = programCounter + 4;
+				// 2 location1 location2 location3 --> subtract the value of location2 from location1 and put the result in loaction3
+				sprintCode[sprintCode[programCounter+3]] = sprintCode[sprintCode[programCounter+1]] - sprintCode[sprintCode[programCounter+2]];
+				break;
+			case 3:
+				// 3 location --> move the instructionPointer to location i.e. next instruction present in location
+				instructionPointer = sprintCode[programCounter+1];
+				break;
+			case 4:
+				// 4 location1 location2 location --> move instructionPointer to location3 if the value in location1 is equal to the value in location2
+				if(sprintCode[sprintCode[programCounter+1]] == sprintCode[sprintCode[programCounter+2]]) {
+					instructionPointer = sprintCode[programCounter + 3];
+				}else {
+					instructionPointer = programCounter + 4;
+				}
+				break;
+			case 5:
+				// 5 location1 location2 location --> move instructionPointer to location3 if the value in location1 is less than the value in location2
+				if(sprintCode[sprintCode[programCounter+1]] < sprintCode[sprintCode[programCounter+2]]) {
+					instructionPointer = sprintCode[programCounter + 3];
+				}else {
+					instructionPointer = programCounter + 4;
+				}
+				break;
+			case 6:
+				instructionPointer =programCounter + 3;
+				// 6 location --> take user input and put the value in location
+				System.out.print("Enter the value you wanted to put in cell "+sprintCode[programCounter+1]);
+				sprintCode[sprintCode[programCounter+1]] = scanner.nextInt();
+				scanner.nextLine();
+				break;
+			case 7:
+				instructionPointer = programCounter + 3;
+				// 7 location1 location2 --> copy the value present in location1 and put in location2
+				sprintCode[sprintCode[programCounter+2]] = sprintCode[sprintCode[programCounter+1]];
+				break;
+			case 9:
+				//9 --> STOP execution
+				break;
+			default:
+				System.out.println("Invalid instruction in cell:"+programCounter+" i.e. "+sprintCode[programCounter]);
+			}
+			instructionExecuted++;
+			if(sprintCode[programCounter] == 9) {
+				//STOP execution
+				break;
+			}
+			programCounter = instructionPointer;
+		}
+		System.out.println("Instruction executed:"+instructionExecuted);
+		System.out.println("Execution completed!\nCode after execution:");
+		for (int loc =1; loc < sprintCode.length; loc++) {
+            System.out.println(loc + " --> " + sprintCode[loc]);
+        }
+        scanner.close();
+	}
+}
+
+
+
+at first we need to create the hash code by one time iteration
+then once again iterate to generate the sprint code using the hashmap
+
+
+
+
+3 start
+op:0 a:0 add_this:0 read:0
+zero:0 one:1 two:2 three:3 four:4 five:5 seven:7 nine:9
+
+start:0 dup:program read
+2 dup one add_this
+7 read pointer
+
+copy:7 pointer:0 op
+
+zero1:4 op zero ifzero
+one1:4 op one ifone
+two1:4 op two iftwo
+three1:4 op three ifthree
+four1:4 op four iffour
+five1:4 op five iffive
+seven1:4 op seven ifseven
+nine1:4 op nine ifnine
+7 op instr
+instr:0
+
+ifzero:1 one pointer z1
+7 z1:0 a
+1 two pointer z2
+1 add_this z2:0 z3
+7 a z3:0
+1 pointer three pointer
+3 copy
+
+ifone:1 one pointer o1
+1 two pointer o2
+1 three pointer o3
+1 add_this o1:0 o4
+1 add_this o2:0 o5
+1 add_this o3:0 o6
+1 o4:0 o5:0 o6:0
+1 pointer four pointer
+3 copy
+
+
+iftwo:1 one pointer t1
+1 two pointer t2
+1 three pointer t3
+1 add_this t1:0 t4
+1 add_this t2:0 t5
+1 add_this t3:0 t6
+2 t4:0 t5:0 t6:0
+1 pointer four pointer
+3 copy
+
+ifthree:1 one pointer th1
+7 th1:0 a
+1 add_this a pointer
+3 copy
+
+iffour:1 one pointer f1
+1 two pointer f2
+1 three pointer f3
+1 add_this f1:0 f4
+1 add_this f2:0 f5
+1 add_this f3:0 f6
+4 f4:0 f5:0 yes4
+1 four pointer pointer
+3 copy
+yes4:0 f6:0 pointer
+3 copy
+
+iffive:1 one pointer v1
+1 two pointer v2
+1 three pointer v3
+1 add_this v1:0 v4
+1 add_this v2:0 v5
+1 add_this v3:0 v6
+5 v4:0 v5:0 yes5
+1 four pointer pointer
+3 copy
+yes5:0 v6:0 pointer
+3 copy
+
+ifseven:1 one pointer s1
+1 two pointer s2
+1 add_this s1:0 s3
+1 add_this s2:0 s4
+7 s3:0 s4:0
+1 pointer three pointer
+3 copy
+
+ifnine:9
+
+program:
